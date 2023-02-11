@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.ComponentModel;
+using System.Windows.Media.Animation;
+using System.Security.Cryptography.X509Certificates;
 
 namespace RadioCS
 {
@@ -38,38 +40,35 @@ namespace RadioCS
 
             button.Content = "Stop";
 
-            new Thread(getData).Start();
+            new Thread(GetData).Start();
         }
 
-        private void getData()
+        private void GetData()
         {
             SongInfo info = new();
-            long end, curr, timeLeft;
             string[] nameArt;
+            long curr, end;
 
             while (true)
             {
                 nameArt = info.GetSongName().Split(" - ");
 
-                this.Dispatcher.Invoke(() =>
+                curr = info.GetCurrent() - info.GetStartTime();
+                end = info.GetEndTime() - info.GetStartTime();
+
+                TimeSpan currT = TimeSpan.FromSeconds(curr);
+                TimeSpan endT = TimeSpan.FromSeconds(end);
+
+                string currStr = currT.ToString(@"mm\:ss");
+                string endStr = endT.ToString(@"mm\:ss");
+
+                this.Dispatcher.Invoke(() => 
                 {
                     songName.Text = nameArt[1];
                     artistName.Text = nameArt[0];
+                    currTime.Text = currStr;
+                    endTime.Text = endStr;
                 });
-
-                end = info.GetEndTime();
-                curr = info.GetCurrent();
-
-                timeLeft = end - curr;
-
-                DateTime defaultUnix = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                DateTime timeUnix = defaultUnix.AddSeconds(timeLeft).ToLocalTime();
-
-                DateTimeOffset timeMill = timeUnix;
-
-                int timeInt = (int)timeMill.ToUnixTimeMilliseconds();
-
-                Thread.Sleep(timeInt + 2000);
             }
         }
     }
