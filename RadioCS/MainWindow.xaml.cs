@@ -16,6 +16,13 @@ using System.Threading;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
 using System.Security.Cryptography.X509Certificates;
+using NAudio.Wave;
+using System.Net;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Sockets;
+using System.Media;
+using System.Net.Http;
 
 namespace RadioCS
 {
@@ -39,6 +46,8 @@ namespace RadioCS
             }
 
             button.Content = "Stop";
+
+            PlayStream("https://stream.r-a-d.io/main.mp3");
 
             new Thread(GetData).Start();
         }
@@ -70,6 +79,23 @@ namespace RadioCS
                     endTime.Text = endStr;
                 });
             }
+        }
+
+        private async void PlayStream(string url)
+        {
+            var client = new HttpClient();
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            using (var fileStream = new FileStream("stream.mp3", FileMode.Create))
+            {
+                await stream.CopyToAsync(fileStream);
+            }
+
+            using var reader = new Mp3FileReader("stream.mp3");
+            using var waveOut = new WaveOutEvent();
+            waveOut.Init(reader);
+            waveOut.Play();
         }
     }
 }

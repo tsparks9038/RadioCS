@@ -8,10 +8,10 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Button x:Name="button" Content="Start" HorizontalAlignment="Center" Margin="0,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.507,0.628" Click="Button_Click"/>
-        <TextBlock x:Name="songName" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center"/>
-        <TextBlock x:Name="artistName" HorizontalAlignment="Center" Margin="0,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,262,0,0" TextWrapping="Wrap" Text="/" VerticalAlignment="Top"/>
-        <TextBlock x:Name="currTime" HorizontalAlignment="Left" Margin="343,262,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
-        <TextBlock x:Name="endTime" HorizontalAlignment="Left" Margin="407,262,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
+        <TextBlock x:Name="songName" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Text="Song"/>
+        <TextBlock x:Name="artistName" HorizontalAlignment="Center" Margin="0,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Artist"/>
+        <TextBlock HorizontalAlignment="Left" Margin="395,251,0,0" TextWrapping="Wrap" Text="/" VerticalAlignment="Top"/>
+        <TextBlock x:Name="currTime" HorizontalAlignment="Left" Margin="362,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00"/>
+        <TextBlock x:Name="endTime" HorizontalAlignment="Left" Margin="405,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00"/>
     </Grid>
 </Window>
