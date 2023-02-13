@@ -1,29 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Threading;
-using System.ComponentModel;
-using System.Windows.Media.Animation;
-using System.Security.Cryptography.X509Certificates;
 using NAudio.Wave;
-using System.Net;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Sockets;
-using System.Media;
-using System.Net.Http;
-using LibVLCSharp;
-using LibVLCSharp.Shared;
+using System.Threading.Tasks;
+using System.Net;
 
 namespace RadioCS
 {
@@ -48,7 +30,8 @@ namespace RadioCS
 
             button.Content = "Stop";
 
-            new Thread(PlayAudio).Start();
+            //StreamingAudio("https://relay0.r-a-d.io/main.mp3");
+            PlayAudio("https://relay0.r-a-d.io/main.mp3");
             new Thread(GetData).Start();
         }
 
@@ -81,70 +64,92 @@ namespace RadioCS
             }
         }
 
-        private void PlayAudio()
+        //DO NOT DELETE, IT KIND OF WORKS!!!!!!!
+        private void PlayAudio(string audioFilePath)
         {
-            // URL of the MP3 file
-            string url = "https://relay0.r-a-d.io/main.mp3";
+            var url = "https://relay0.r-a-d.io/main.mp3";
+            var wc = new WebClient();
+            var stream = wc.OpenRead(url);
 
-            // Buffer size in bytes
-            int bufferSize = 4096;
+            var ffmpegProcess = new Process();
+            ffmpegProcess.StartInfo.FileName = "ffmpeg.exe";
+            ffmpegProcess.StartInfo.Arguments = "-i - -f wav -";
+            ffmpegProcess.StartInfo.UseShellExecute = false;
+            ffmpegProcess.StartInfo.RedirectStandardInput = true;
+            ffmpegProcess.StartInfo.RedirectStandardOutput = true;
+            ffmpegProcess.StartInfo.CreateNoWindow = true;
+            ffmpegProcess.Start();
 
-            // Number of bytes to read from the MP3 file
-            int chunkSize = 1024 * 1024; // 1 MB
-
-            // Create a request to the URL
-            WebRequest request = WebRequest.Create(url);
-
-            // Get the response from the request
-            WebResponse response = request.GetResponse();
-
-            // Get the stream from the response
-            Stream stream = response.GetResponseStream();
-
-            // Create a buffer
-            byte[] buffer = new byte[bufferSize];
-
-            // Create a memory stream to store the MP3 data
-            using (var memoryStream = new MemoryStream())
+            Task.Factory.StartNew(() =>
             {
-                // Read the first chunk of the MP3 file
-                int bytesRead = 0;
-                int totalBytesRead = 0;
-                while (totalBytesRead < chunkSize && (bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                var buffer = new byte[4096];
+                int read;
+                while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    memoryStream.Write(buffer, 0, bytesRead);
-                    totalBytesRead += bytesRead;
+                    ffmpegProcess.StandardInput.BaseStream.Write(buffer, 0, read);
                 }
 
-                // Reset the position of the memory stream
-                memoryStream.Position = 0;
+                ffmpegProcess.StandardInput.Close();
+            });
 
-                // Create a wave stream for the MP3 data
-                using (var waveStream = new Mp3FileReader(memoryStream))
+            var waveFormat = new WaveFormat(44100, 16, 2);
+            var waveOut = new WaveOutEvent();
+            var bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
+            bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(30);
+            waveOut.Init(bufferedWaveProvider);
+
+            Task.Factory.StartNew(() =>
+            {
+                var buffer = new byte[4096];
+                int read;
+                while ((read = ffmpegProcess.StandardOutput.BaseStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    // Create a wave output device
-                    using (var waveOut = new WaveOutEvent())
-                    {
-                        // Set the wave stream as the source for the wave output device
-                        waveOut.Init(waveStream);
-
-                        // Play the MP3 data
-                        waveOut.Play();
-
-                        // Wait for the playback to complete
-                        while (waveOut.PlaybackState == PlaybackState.Playing)
-                        {
-                            System.Threading.Thread.Sleep(100);
-                        }
-                    }
+                    bufferedWaveProvider.AddSamples(buffer, 0, read);
                 }
-            }
 
-            // Close the response stream
-            stream.Close();
+                waveOut.Stop();
+                ffmpegProcess.Dispose();
+            });
 
-            // Wait for user input
-            Console.ReadLine();
+            waveOut.Play();
+
+            //var url = "https://relay0.r-a-d.io/main.mp3";
+            //var wc = new WebClient();
+            //var stream = wc.OpenRead(url);
+            //var buffer = new byte[16384 * 4];
+            //var waveOut = new WaveOutEvent();
+            //var bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat());
+            //bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(30);
+            //waveOut.Init(bufferedWaveProvider);
+
+            //Task.Factory.StartNew(() =>
+            //{
+            //    while (true)
+            //    {
+            //        int read = stream.Read(buffer, 0, buffer.Length);
+            //        if (read == 0) break;
+            //        bufferedWaveProvider.AddSamples(buffer, 0, read);
+            //    }
+            //});
+
+            //waveOut.Play();
+        }
+
+        private RawSourceWaveStream StreamingAudio(string url)
+        {
+            var ffmpegProcess = new Process();
+            ffmpegProcess.StartInfo.FileName = "ffmpeg.exe";
+            ffmpegProcess.StartInfo.Arguments = $"-i {url} -f wav -";
+            ffmpegProcess.StartInfo.UseShellExecute = false;
+            ffmpegProcess.StartInfo.RedirectStandardOutput = true;
+            ffmpegProcess.StartInfo.CreateNoWindow = true;
+            ffmpegProcess.Start();
+
+            var bufferedStream = new BufferedStream(ffmpegProcess.StandardOutput.BaseStream);
+            var waveFormat = new WaveFormat(44100, 1);
+            var rawSourceWaveStream = new RawSourceWaveStream(bufferedStream, waveFormat);
+
+            return rawSourceWaveStream;
         }
     }
 }
