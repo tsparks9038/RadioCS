@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -23,6 +22,8 @@ using System.IO;
 using System.Net.Sockets;
 using System.Media;
 using System.Net.Http;
+using LibVLCSharp;
+using LibVLCSharp.Shared;
 
 namespace RadioCS
 {
@@ -47,8 +48,7 @@ namespace RadioCS
 
             button.Content = "Stop";
 
-            PlayStream("https://stream.r-a-d.io/main.mp3");
-
+            new Thread(PlayAudio).Start();
             new Thread(GetData).Start();
         }
 
@@ -81,21 +81,70 @@ namespace RadioCS
             }
         }
 
-        private async void PlayStream(string url)
+        private void PlayAudio()
         {
-            var client = new HttpClient();
-            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-            var stream = await response.Content.ReadAsStreamAsync();
+            // URL of the MP3 file
+            string url = "https://relay0.r-a-d.io/main.mp3";
 
-            using (var fileStream = new FileStream("stream.mp3", FileMode.Create))
+            // Buffer size in bytes
+            int bufferSize = 4096;
+
+            // Number of bytes to read from the MP3 file
+            int chunkSize = 1024 * 1024; // 1 MB
+
+            // Create a request to the URL
+            WebRequest request = WebRequest.Create(url);
+
+            // Get the response from the request
+            WebResponse response = request.GetResponse();
+
+            // Get the stream from the response
+            Stream stream = response.GetResponseStream();
+
+            // Create a buffer
+            byte[] buffer = new byte[bufferSize];
+
+            // Create a memory stream to store the MP3 data
+            using (var memoryStream = new MemoryStream())
             {
-                await stream.CopyToAsync(fileStream);
+                // Read the first chunk of the MP3 file
+                int bytesRead = 0;
+                int totalBytesRead = 0;
+                while (totalBytesRead < chunkSize && (bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    memoryStream.Write(buffer, 0, bytesRead);
+                    totalBytesRead += bytesRead;
+                }
+
+                // Reset the position of the memory stream
+                memoryStream.Position = 0;
+
+                // Create a wave stream for the MP3 data
+                using (var waveStream = new Mp3FileReader(memoryStream))
+                {
+                    // Create a wave output device
+                    using (var waveOut = new WaveOutEvent())
+                    {
+                        // Set the wave stream as the source for the wave output device
+                        waveOut.Init(waveStream);
+
+                        // Play the MP3 data
+                        waveOut.Play();
+
+                        // Wait for the playback to complete
+                        while (waveOut.PlaybackState == PlaybackState.Playing)
+                        {
+                            System.Threading.Thread.Sleep(100);
+                        }
+                    }
+                }
             }
 
-            using var reader = new Mp3FileReader("stream.mp3");
-            using var waveOut = new WaveOutEvent();
-            waveOut.Init(reader);
-            waveOut.Play();
+            // Close the response stream
+            stream.Close();
+
+            // Wait for user input
+            Console.ReadLine();
         }
     }
 }
