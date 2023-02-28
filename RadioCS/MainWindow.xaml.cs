@@ -3,7 +3,6 @@ using System.Windows;
 using System.Threading;
 using NAudio.Wave;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using System.Net;
 
@@ -14,6 +13,8 @@ namespace RadioCS
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly WaveOutEvent waveOut = new();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -23,6 +24,7 @@ namespace RadioCS
         {
             if (button.Content.ToString() == "Stop")
             {
+                waveOut.Stop();
                 button.Content = "Play";
 
                 return;
@@ -30,7 +32,8 @@ namespace RadioCS
 
             button.Content = "Stop";
 
-            PlayAudio("https://relay0.r-a-d.io/main.mp3");
+            volume.Value = waveOut.Volume;
+            PlayAudio();
             new Thread(GetData).Start();
         }
 
@@ -64,7 +67,7 @@ namespace RadioCS
         }
 
         //DO NOT DELETE, IT KIND OF WORKS!!!!!!!
-        private void PlayAudio(string audioFilePath)
+        private void PlayAudio()
         {
             var url = "https://relay0.r-a-d.io/main.mp3";
             var wc = new WebClient();
@@ -92,7 +95,7 @@ namespace RadioCS
             });
 
             var waveFormat = new WaveFormat(44100, 16, 2);
-            var waveOut = new WaveOutEvent();
+            
             var bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
             bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(30);
             waveOut.Init(bufferedWaveProvider);
@@ -111,6 +114,11 @@ namespace RadioCS
             });
 
             waveOut.Play();
+        }
+
+        private void volume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            waveOut.Volume = (float)volume.Value;
         }
     }
 }

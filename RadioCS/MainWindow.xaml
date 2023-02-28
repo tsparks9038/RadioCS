@@ -13,5 +13,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="395,251,0,0" TextWrapping="Wrap" Text="/" VerticalAlignment="Top" Foreground="#FF5F5F5F"/>
         <TextBlock x:Name="currTime" HorizontalAlignment="Left" Margin="362,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00" Foreground="#FF5F5F5F"/>
         <TextBlock x:Name="endTime" HorizontalAlignment="Left" Margin="405,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00" Foreground="#FF5F5F5F"/>
+        <Slider x:Name="volume" HorizontalAlignment="Left" Margin="733,161,0,0" VerticalAlignment="Top" Width="18" Orientation="Vertical" Height="124" ValueChanged="volume_ValueChanged" Maximum="1" LargeChange="0.1" SmallChange="0.01"/>
+        <Label Content="Volume" HorizontalAlignment="Left" Margin="717,290,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="#FF787878"/>
     </Grid>
 </Window>
