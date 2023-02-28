@@ -23,14 +23,13 @@ namespace RadioCS
         {
             if (button.Content.ToString() == "Stop")
             {
-                button.Content = "Start";
+                button.Content = "Play";
 
                 return;
             }
 
             button.Content = "Stop";
 
-            //StreamingAudio("https://relay0.r-a-d.io/main.mp3");
             PlayAudio("https://relay0.r-a-d.io/main.mp3");
             new Thread(GetData).Start();
         }
@@ -112,44 +111,6 @@ namespace RadioCS
             });
 
             waveOut.Play();
-
-            //var url = "https://relay0.r-a-d.io/main.mp3";
-            //var wc = new WebClient();
-            //var stream = wc.OpenRead(url);
-            //var buffer = new byte[16384 * 4];
-            //var waveOut = new WaveOutEvent();
-            //var bufferedWaveProvider = new BufferedWaveProvider(new WaveFormat());
-            //bufferedWaveProvider.BufferDuration = TimeSpan.FromSeconds(30);
-            //waveOut.Init(bufferedWaveProvider);
-
-            //Task.Factory.StartNew(() =>
-            //{
-            //    while (true)
-            //    {
-            //        int read = stream.Read(buffer, 0, buffer.Length);
-            //        if (read == 0) break;
-            //        bufferedWaveProvider.AddSamples(buffer, 0, read);
-            //    }
-            //});
-
-            //waveOut.Play();
-        }
-
-        private RawSourceWaveStream StreamingAudio(string url)
-        {
-            var ffmpegProcess = new Process();
-            ffmpegProcess.StartInfo.FileName = "ffmpeg.exe";
-            ffmpegProcess.StartInfo.Arguments = $"-i {url} -f wav -";
-            ffmpegProcess.StartInfo.UseShellExecute = false;
-            ffmpegProcess.StartInfo.RedirectStandardOutput = true;
-            ffmpegProcess.StartInfo.CreateNoWindow = true;
-            ffmpegProcess.Start();
-
-            var bufferedStream = new BufferedStream(ffmpegProcess.StandardOutput.BaseStream);
-            var waveFormat = new WaveFormat(44100, 1);
-            var rawSourceWaveStream = new RawSourceWaveStream(bufferedStream, waveFormat);
-
-            return rawSourceWaveStream;
         }
     }
 }

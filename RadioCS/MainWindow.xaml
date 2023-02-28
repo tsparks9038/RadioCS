@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RadioCS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button x:Name="button" Content="Start" HorizontalAlignment="Center" Margin="0,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.507,0.628" Click="Button_Click"/>
-        <TextBlock x:Name="songName" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Text="Song"/>
-        <TextBlock x:Name="artistName" HorizontalAlignment="Center" Margin="0,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Artist"/>
-        <TextBlock HorizontalAlignment="Left" Margin="395,251,0,0" TextWrapping="Wrap" Text="/" VerticalAlignment="Top"/>
-        <TextBlock x:Name="currTime" HorizontalAlignment="Left" Margin="362,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00"/>
-        <TextBlock x:Name="endTime" HorizontalAlignment="Left" Margin="405,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00"/>
+        Title="RadioCS" Height="450" Width="800">
+    <Grid Background="#FF222222">
+        <Button x:Name="button" Content="Play" HorizontalAlignment="Center" Margin="0,293,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.507,0.628" Click="Button_Click" Background="#FF384F62" BorderBrush="#FF384F62" Foreground="#FFCDD1C1"/>
+        <TextBlock x:Name="songName" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Text="Song" FontSize="24" Margin="0,185,0,0" Foreground="#FF787878"/>
+        <TextBlock x:Name="artistName" HorizontalAlignment="Center" Margin="0,222,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="Artist" FontSize="16" Foreground="#FF787878"/>
+        <TextBlock HorizontalAlignment="Left" Margin="395,251,0,0" TextWrapping="Wrap" Text="/" VerticalAlignment="Top" Foreground="#FF5F5F5F"/>
+        <TextBlock x:Name="currTime" HorizontalAlignment="Left" Margin="362,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00" Foreground="#FF5F5F5F"/>
+        <TextBlock x:Name="endTime" HorizontalAlignment="Left" Margin="405,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="00:00" Foreground="#FF5F5F5F"/>
     </Grid>
 </Window>
